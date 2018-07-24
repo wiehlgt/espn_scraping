@@ -1,0 +1,40 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium import webdriver
+from bs4 import BeautifulSoup as bs4
+import pandas as pd
+
+path_to_chromedriver = 'C:/Users/gwhy5/Desktop/python.py/chromedriver.exe' # change path as needed
+driver = webdriver.Chrome(executable_path = path_to_chromedriver)
+driver.wait = WebDriverWait(driver, 15)
+url = 'http://games.espn.com/ffl/freeagency?teamId=5&leagueId=1032719&seasonId=2017#&seasonId=2017&avail=-1'
+
+driver.get(url)
+driver.switch_to.frame('disneyid-iframe')
+email = driver.find_element_by_css_selector('#did-ui > div > div > section > section > form > section > div:nth-child(1) > div > label > span.input-wrapper > input')
+email.send_keys('wiehlgt@mymail.vcu.edu')
+password = driver.find_element_by_css_selector('#did-ui > div > div > section > section > form > section > div:nth-child(2) > div > label > span.input-wrapper > input')
+password.send_keys('H0tdogdude')
+button = driver.find_element_by_css_selector('#did-ui > div > div > section > section > form > section > div.btn-group.touch-print-btn-group-wrapper > button')
+button.click()
+#Wait until last data in last row is loaded just in case:
+driver.wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '//*[@id="plyr16757"]/td[14]/nobr/span')))
+driver.switch_to_default_content()
+#pulls together soup, scrapes tables for text
+soup = bs4(driver.page_source, 'html5lib')
+table = soup.find(id="playertable_0")
+row_zero = table.find_all("tr", {"class": "pncPlayerRow playerTableBgRow0"})
+row_one = table.find_all("tr", {"class": "pncPlayerRow playerTableBgRow1"})
+#combine the row list
+for item in row_one:
+    row_zero.append(item)
+
+player_list={}
+for item in row_zero:    
+    table_data=item.find_all("td") 
+    for i in table_data:
+        name=i.a.text
+        print name
+        
